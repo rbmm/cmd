@@ -548,7 +548,7 @@ class ZCmdWnd : public ZSDIFrameWnd, ZTranslateMsg
 								{
 									SaveCmd(lpWideCharStr + 1);
 
-									if (ULONG cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, 
+									if (ULONG cbMultiByte = WideCharToMultiByte(_m_pSocket->getCP(), 0, 
 										lpWideCharStr + 1, cchWideChar, lpMultiByteStr, cchWideChar * sizeof(WCHAR), 0, 0))
 									{
 										lpMultiByteStr[cbMultiByte++] = '\r';
