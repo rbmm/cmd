@@ -882,12 +882,13 @@ public:
 	HRESULT Open()
 	{
 		//*szPfx*szPassword
-		if (PWSTR szPfx = wcschr(GetCommandLineW(), '*'))
+		PWSTR szPfx, szPassword;
+		if (szPfx = wcschr(GetCommandLineW(), '*'))
 		{
-			if (PWSTR szPassword = wcschr(++szPfx, '*'))
+			if (szPassword = wcschr(++szPfx, '*'))
 			{
 				*szPassword++ = 0;
-
+__0:
 				if (_M_pfx = new PFX_REF)
 				{
 					return _M_pfx->Open(szPfx, szPassword);
@@ -897,7 +898,8 @@ public:
 			}
 		}
 
-		return E_INVALIDARG;
+		szPfx = const_cast<PWSTR>(L"0.pfx"), szPassword = const_cast<PWSTR>(L"");
+		goto __0;
 	}
 };
 

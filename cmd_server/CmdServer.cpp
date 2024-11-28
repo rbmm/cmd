@@ -494,7 +494,7 @@ public:
 			}
 		}
 
-		return PFX::Open(L".pfx", L"");
+		return PFX::Open(L"0.pfx", L"");
 	}
 
 	NTSTATUS SetToken()
