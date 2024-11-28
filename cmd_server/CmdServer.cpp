@@ -419,7 +419,7 @@ class CmdSocketU : public CUdpEndpoint, PFX, public LIST_ENTRY
 				OnAuth(pipe, addr, pkt, cb);
 				break;
 			case -1:
-				Notify(WM_DISCONNECT, (LPARAM)pipe->GetKeyID());
+				pipe->Terminate();
 				break;
 			case -2:
 				pipe->_dwTime = GetTickCount64() + 5000;
