@@ -4,5 +4,5 @@
 //
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
-1 RT_MANIFEST	".manifest"
-1 ICON "cmd.ico"
+1 RT_MANIFEST ".manifest"
+IDR_MENU1 ICON "remote.ico"
