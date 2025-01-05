@@ -57,7 +57,7 @@ ULONG RestrictProcess(HANDLE hProcess)
 
 struct CmdPipe : public CPipeEnd, public LIST_ENTRY
 {
-	ULONG64 _M_key, _dwTime = GetTickCount64() + 5000;
+	ULONG64 _M_key, _dwTime = GetTickCount64() + 8000;
 	CUdpEndpoint* _pSocket = 0;
 	BCRYPT_KEY_HANDLE _M_hKey = 0;
 	HANDLE _hProcess = 0;
@@ -422,7 +422,7 @@ class CmdSocketU : public CUdpEndpoint, PFX, public LIST_ENTRY
 				pipe->Terminate();
 				break;
 			case -2:
-				pipe->_dwTime = GetTickCount64() + 5000;
+				pipe->_dwTime = GetTickCount64() + 8000;
 				DbgPrint("[%u]: <-- ping\r\n", GetTickCount()/1000);
 				break;
 			default:
@@ -781,7 +781,7 @@ class ZTryWnd : public ZDlg, CIcons
 
 		case WM_INITDIALOG:
 			OnInitDialog(hwnd);
-			SetTimer(hwnd, (UINT_PTR)this, 3000, 0);
+			SetTimer(hwnd, (UINT_PTR)this, 4000, 0);
 			break;
 
 		case WM_DESTROY:

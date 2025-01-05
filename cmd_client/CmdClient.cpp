@@ -30,8 +30,11 @@ class CPDlg : public ZDlg
 			UCHAR buf[sizeof(KEY_VALUE_BASIC_INFORMATION) + 15*sizeof(WCHAR)];
 		};
 
-		swprintf_s(kvbi.Name, 15, L"CP_%u", _M_CP);
-		SendMessageW(hwndCB, CB_SETITEMDATA, SendMessageW(hwndCB, CB_ADDSTRING, 0, (LPARAM)kvbi.Name), _M_CP);
+		if (CP_UTF8 != _M_CP)
+		{
+			swprintf_s(kvbi.Name, 15, L"CP_%u", _M_CP);
+			SendMessageW(hwndCB, CB_SETITEMDATA, SendMessageW(hwndCB, CB_ADDSTRING, 0, (LPARAM)kvbi.Name), _M_CP);
+		}
 		SendMessageW(hwndCB, CB_SETITEMDATA, SendMessageW(hwndCB, CB_ADDSTRING, 0, (LPARAM)L"UTF8"), CP_UTF8);
 		SendMessageW(hwndCB, CB_SETCURSEL, 0, 0);
 
@@ -201,7 +204,7 @@ public:
 
 class CmdSocket : public CUdpEndpoint, UdpHelper
 {
-	ULONG64 _M_rkey = 0, _dwTime = GetTickCount64() + 5000;
+	ULONG64 _M_rkey = 0, _dwTime = GetTickCount64() + 8000;
 	BCRYPT_KEY_HANDLE _M_hKey = 0;
 	PVOID _M_pvAuth = 0;
 	HWND _M_hwnd;
@@ -211,7 +214,7 @@ class CmdSocket : public CUdpEndpoint, UdpHelper
 	ULONG _M_key = 0;
 	LONG _M_nextID = 0;
 	LONG _M_flags = 0;
-	UINT _M_CP = GetOEMCP(), _M_CPs = 0;
+	UINT _M_CP = GetOEMCP();
 
 	enum { f_error, f_connected };
 
@@ -299,7 +302,7 @@ class CmdSocket : public CUdpEndpoint, UdpHelper
 			return TRUE;
 
 		case -2: // ping
-			_dwTime = GetTickCount64() + 5000;
+			_dwTime = GetTickCount64() + 8000;
 			DbgPrint("[%u]: <-- ping\r\n", GetTickCount()/1000);
 			return TRUE;
 		}
@@ -327,7 +330,7 @@ class CmdSocket : public CUdpEndpoint, UdpHelper
 						return FALSE;
 					}
 
-					_M_CPs = _M_CP = *(UINT*)pkt->_M_buf;
+					_M_CP = *(UINT*)pkt->_M_buf;
 
 					PostMessageW(_M_hwnd, WM_CONNECT, _M_CP, 0);
 
@@ -454,7 +457,7 @@ public:
 
 	UINT getCP()
 	{
-		return _M_CPs;
+		return _M_CP;
 	}
 
 	void setCP(ULONG cp)
@@ -542,14 +545,14 @@ class ZCmdWnd : public ZSDIFrameWnd, ZTranslateMsg
 								PSTR lpMultiByteStr;
 							};
 
-							if (buf = _malloca((cchWideChar + 3) * sizeof(WCHAR)))
+							if (buf = _malloca((2*cchWideChar + 3) * sizeof(WCHAR)))
 							{
 								if (cchWideChar = GetWindowText(_hwndEdit[1], lpWideCharStr + 1, cchWideChar + 1))
 								{
 									SaveCmd(lpWideCharStr + 1);
 
 									if (ULONG cbMultiByte = WideCharToMultiByte(_m_pSocket->getCP(), 0, 
-										lpWideCharStr + 1, cchWideChar, lpMultiByteStr, cchWideChar * sizeof(WCHAR), 0, 0))
+										lpWideCharStr + 1, cchWideChar, lpMultiByteStr, 2*cchWideChar * sizeof(WCHAR), 0, 0))
 									{
 										lpMultiByteStr[cbMultiByte++] = '\r';
 										lpMultiByteStr[cbMultiByte++] = '\n';
@@ -623,10 +626,16 @@ class ZCmdWnd : public ZSDIFrameWnd, ZTranslateMsg
 			WCHAR sz[32];
 			MENUITEMINFO mii = { sizeof(mii), MIIM_STRING};
 			mii.dwTypeData = sz;
-			swprintf_s(sz, _countof(sz), L"CP-%u", CP);
+			if (CP_UTF8 != CP)
+			{
+				swprintf_s(sz, _countof(sz), L"CP-%u", CP);
+			}
+			else
+			{
+				wcscpy(sz, L"UTF8");
+			}
 			SetMenuItemInfoW(hmenu, ID_CP, FALSE, &mii);
 		}
-
 	}
 
 	void ED(HWND hwnd, BOOL bConnected, UINT CP = 0)
@@ -731,7 +740,7 @@ __nt:
 			ED(hwnd, TRUE, (UINT)wParam);
 			SetWindowTextW(_hwndEdit[1], 0);
 			_M_state = s_connected;
-			SetTimer(hwnd, (UINT_PTR)this, 3000, 0);
+			SetTimer(hwnd, (UINT_PTR)this, 4000, 0);
 			break;
 
 		case WM_DISCONNECT:
